@@ -1,0 +1,170 @@
+
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Gioco per bambini</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- Importa il font Poppins -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet" />
+    <style>
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        font-family: 'Poppins', sans-serif;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        min-height: 100vh;
+        margin: 0;
+        background: linear-gradient(135deg, #74ABE2, #5563DE);
+        color: #333;
+      }
+      .start-container, .game-container {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 16px;
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+        padding: 2rem;
+        text-align: center;
+        width: 90%;
+        max-width: 500px;
+      }
+      .start-button {
+        font-size: 1.8rem;
+        padding: 1rem 2rem;
+        background: #ff7f50;
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: background 0.3s, transform 0.3s;
+      }
+      .start-button:hover {
+        background: #ff6333;
+        transform: scale(1.05);
+      }
+      .letter-display {
+        font-size: 6rem;
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        color: #5563de;
+      }
+      .options {
+        display: flex;
+        gap: 1rem;
+        justify-content: center;
+        flex-wrap: wrap;
+      }
+      .option {
+        background: #ffffff;
+        border: 3px solid #ff7f50;
+        padding: 1.5rem 2.5rem;
+        font-size: 4rem;
+        cursor: pointer;
+        border-radius: 12px;
+        transition: transform 0.2s, box-shadow 0.2s;
+      }
+      .option:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+      }
+      .feedback-img {
+        width: 300px;
+        height: auto;
+        display: block;
+        margin: 1.5rem auto;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      }
+      .game-container {
+        display: none;
+        margin-top: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="start-container" id="startContainer">
+      <h1>Benvenuto nel gioco delle lettere!</h1>
+      <p>Scegli la lettera corretta per vincere!</p>
+      <button class="start-button" onclick="startGame()">Inizia il gioco</button>
+    </div>
+    <div class="game-container" id="gameContainer">
+      <div class="letter-display" id="displayLetter" style="display:none"></div>
+      <img id="feedbackImage" class="feedback-img" style="display: none" alt="Feedback" />
+      <div class="options" id="options"></div>
+    </div>
+
+    <script>
+      // Array delle lettere dell'alfabeto
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ".split("");
+      const audioResult = true;
+      const feedbackImage = document.getElementById("feedbackImage");
+      const displayLetter = document.getElementById("displayLetter");
+      const optionsDiv = document.getElementById("options");
+      const startContainer = document.getElementById("startContainer");
+      const gameContainer = document.getElementById("gameContainer");
+
+      function startGame() {
+        startContainer.style.display = "none";
+        gameContainer.style.display = "block";
+        newRound();
+      }
+
+      function newRound() {
+        feedbackImage.style.display = "none";
+        // Scegli una lettera casuale come risposta corretta
+        const correctLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
+
+        // Genera le opzioni includendo quella corretta
+        let options = [correctLetter];
+        while (options.length < 3) {
+          let randomLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
+          if (!options.includes(randomLetter)) {
+            options.push(randomLetter);
+          }
+        }
+        // Mischia le opzioni
+        options.sort(() => Math.random() - 0.5);
+
+        // Mostra la lettera da trovare
+        displayLetter.textContent = correctLetter;
+
+        // Mostra le opzioni
+        optionsDiv.innerHTML = "";
+        options.forEach(letter => {
+          const btn = document.createElement("div");
+          btn.classList.add("option");
+          btn.textContent = letter;
+          btn.onclick = () => checkAnswer(letter, correctLetter);
+          optionsDiv.appendChild(btn);
+        });
+
+        // Output audio: "Trova la lettera X"
+        if (audioResult) {
+          speakStr(`Trova la lettera ${correctLetter}`);
+        }
+      }
+
+      function checkAnswer(chosen, correctLetter) {
+        if (chosen === correctLetter) {
+          speakStr("Bravo, hai vinto!");
+          // Visualizza un'immagine divertente (ad esempio un gatto)
+          feedbackImage.src = "https://cataas.com/cat?timestamp=" + Date.now();
+          feedbackImage.style.display = "block";
+          setTimeout(newRound, 2000);
+        } else {
+          speakStr(`No, hai scelto la lettera ${chosen}. Devi trovare la ${correctLetter}`);
+        }
+      }
+
+      function speakStr(text) {
+        const msg = new SpeechSynthesisUtterance(text);
+        msg.rate = 0.6;
+        window.speechSynthesis.speak(msg);
+      }
+    </script>
+  </body>
+</html>
